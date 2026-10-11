@@ -1,0 +1,65 @@
+{
+  "name": "forge-cli",
+  "version": "1.0.0",
+  "description": "Generate and maintain secure-by-default projects: templates, CI pipelines with pinned security scanning, and a doctor that keeps them honest.",
+  "keywords": [
+    "scaffold",
+    "generator",
+    "devsecops",
+    "devops",
+    "security",
+    "ci",
+    "cli"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@12.10.1",
+  "bin": {
+    "forge": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "features",
+    "pins",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "validate:templates": "pnpm build && node scripts/validate-templates.mjs",
+    "prepublishOnly": "pnpm check && pnpm build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "commander": "^15.0.0",
+    "handlebars": "^4.7.10",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.4",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^10.12.0",
+    "fast-check": "^4.10.2",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
+  }
+}

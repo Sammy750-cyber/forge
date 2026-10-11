@@ -1,0 +1,13 @@
+{
+  "id": "ci",
+  "version": "0.1.0",
+  "kind": "feature",
+  "description": "Install, typecheck, lint, test and build on every push and pull request (GitHub Actions or GitLab CI).",
+  "questions": [
+    { "id": "provider", "type": "enum", "message": "CI provider", "choices": ["github", "gitlab"], "default": "github" },
+    { "id": "default-branch", "type": "string", "message": "Default branch", "default": "main", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$" },
+    { "id": "node-version", "type": "string", "message": "Node.js major version for CI", "default": "22", "pattern": "^[0-9]{2}$" },
+    { "id": "package-manager", "type": "enum", "message": "Package manager", "choices": ["npm", "pnpm"], "default": "npm" }
+  ],
+  "pipeline": { "checks": [{ "kind": "node-ci" }] }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "minimal",
+  "version": "0.1.0",
+  "kind": "template",
+  "description": "A tiny Node project used to exercise the Forge engine.",
+  "questions": [
+    { "id": "description", "type": "string", "message": "One-line project description", "default": "A new Forge project" },
+    { "id": "license", "type": "enum", "message": "License", "choices": ["MIT", "none"], "default": "MIT" },
+    { "id": "contributing", "type": "boolean", "message": "Include a CONTRIBUTING.md?", "default": false }
+  ],
+  "files": [
+    { "path": "scripts/hello.sh.hbs", "executable": true },
+    { "path": "LICENSE.hbs", "when": { "answer": "license", "equals": "none", "not": true } },
+    { "path": "CONTRIBUTING.md.hbs", "when": { "answer": "contributing", "equals": true } }
+  ]
+}

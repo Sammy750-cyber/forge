@@ -1,0 +1,30 @@
+{
+  "answers": {
+    "default-branch": "main",
+    "docker": false,
+    "dockerfile": null,
+    "node-version": "22",
+    "package-manager": "pnpm",
+    "provider": "github",
+    "schedule": true,
+    "severity": "HIGH"
+  },
+  "features": [
+    {
+      "id": "ci",
+      "version": "0.1.0"
+    },
+    {
+      "id": "scan",
+      "version": "0.1.0"
+    }
+  ],
+  "files": {
+    ".github/workflows/ci.yml": "af8cad6cea7b323d97ad38ba0213f2cd0689f52bcbea8fb98116f6eb706ceb3d",
+    ".github/workflows/scan.yml": "9213375deb4392debc7e7ef77082196ab34a1eabb6866c553dae18bae9547b55"
+  },
+  "forgeVersion": "1.0.0",
+  "name": "forge-cli",
+  "schemaVersion": 1,
+  "template": null
+}

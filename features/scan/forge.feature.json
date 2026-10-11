@@ -1,0 +1,24 @@
+{
+  "id": "scan",
+  "version": "0.1.0",
+  "kind": "feature",
+  "description": "Security scanning in CI: secrets, dependencies, static analysis, IaC misconfiguration and (optionally) the container image.",
+  "questions": [
+    { "id": "provider", "type": "enum", "message": "CI provider", "choices": ["github", "gitlab"], "default": "github" },
+    { "id": "default-branch", "type": "string", "message": "Default branch", "default": "main", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$" },
+    { "id": "severity", "type": "enum", "message": "Fail the pipeline at or above this severity", "choices": ["MEDIUM", "HIGH", "CRITICAL"], "default": "HIGH" },
+    { "id": "schedule", "type": "boolean", "message": "Also scan weekly (new vulnerabilities appear without code changes)?", "default": true },
+    { "id": "docker", "type": "boolean", "message": "Scan a Docker image?", "default": false },
+    { "id": "dockerfile", "type": "string", "message": "Dockerfile path", "default": "Dockerfile", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$", "when": { "answer": "docker", "equals": true } }
+  ],
+  "files": [{ "path": "_dot_trivyignore", "mergeStrategy": "line-set" }],
+  "pipeline": {
+    "checks": [
+      { "kind": "secrets" },
+      { "kind": "dependencies" },
+      { "kind": "sast" },
+      { "kind": "iac" },
+      { "kind": "container", "when": { "answer": "docker", "equals": true } }
+    ]
+  }
+}

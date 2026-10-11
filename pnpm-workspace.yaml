@@ -1,0 +1,5 @@
+allowBuilds:
+  esbuild: false
+# Force the patched esbuild (GHSA-g7r4-m6w7-qqqr) for every consumer: tsup, and vite via vitest.
+overrides:
+  esbuild: '>=0.28.1'
