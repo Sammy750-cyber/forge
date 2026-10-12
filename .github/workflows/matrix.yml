@@ -20,7 +20,7 @@ jobs:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
-    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    # continue-on-error: ${{ matrix.os == 'windows-latest' }}
     strategy:
       fail-fast: false
       matrix:

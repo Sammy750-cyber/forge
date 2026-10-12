@@ -62,6 +62,7 @@ The test strategy (fault injection, convergence checks, running the tool on itse
 | The weekly `schedule` set for `scan` also scheduled the plain CI workflow | reading generated output | schedule only workflows that contain a security check |
 | Interactive mode asked about git and install before the template questions | CLI interactive test | answers first, then post-steps |
 | Forge's own repo did not ignore `.env` | running `forge doctor` on Forge | `forge doctor --fix` |
+| Command injection and process execution | Forge’s own `scan` pipeline. | called `cmd.exe` explicitly with a fixed argument list and no shell option. It also rejects any argument containing `cmd.exe` metacharacters, so a mistake in the future can’t turn into command injection. |
 
 ## Residual risks and unverified items
 
