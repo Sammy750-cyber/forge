@@ -30,7 +30,8 @@ const step = (label, cwd, command, args, timeout = 240_000) => {
     return true;
   }
   failures += 1;
-  console.log(`  FAIL  ${label} (${seconds}s)\n${(result.stdout + result.stderr).split('\n').slice(-25).join('\n')}`);
+  // console.log(`  FAIL  ${label} (${seconds}s)\n${(result.stdout + result.stderr).split('\n').slice(-25).join('\n')}`);
+  console.log(`  FAIL  ${label} (${seconds}s)\n${(String(result.stdout ?? '') + String(result.stderr ?? '')).split('\n').slice(-25).join('\n')}`);
   return false;
 };
 

@@ -1,0 +1,53 @@
+{
+  "answers": {
+    "default-branch": "main",
+    "description": "An Express API",
+    "docker": true,
+    "dockerfile": "Dockerfile",
+    "license": "MIT",
+    "node-version": "22",
+    "package-manager": "npm",
+    "port": "3000",
+    "provider": "github",
+    "schedule": true,
+    "severity": "HIGH"
+  },
+  "features": [
+    {
+      "id": "ci",
+      "version": "0.1.0"
+    },
+    {
+      "id": "scan",
+      "version": "0.1.0"
+    }
+  ],
+  "files": {
+    ".dockerignore": "7ecc32d93452f75a6b0fca450cd50f88687372d11d093df700cde7f12fd024dd",
+    ".env.example": "fcaae9f82d1b8a09cfc45dba40a5cc7e5054df4ac5bcb18758ee57099e1953ac",
+    ".github/workflows/ci.yml": "c83725ac93e7760c8d8e7ae1e8475a42d70e6e5aa113695b6f2c50d1c9b1251e",
+    ".github/workflows/scan.yml": "3196deca5d69d98355e435f598eb3a73112acbd55f91da173689855c45766ae2",
+    ".gitignore": "ec5d82df57a2ef016cbc1112182e2bec820d996ebd9bfff4f9aeaa450f055b4f",
+    ".nvmrc": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56",
+    "Dockerfile": "f7c72ed64e1c716640911fde80e7c31807fbd45f2e3ac9e9ea914e2cd587d4c0",
+    "LICENSE": "a56f3dd290766d8bef41a0902867301f7cf0ecf79a15b9e38846e979c366d952",
+    "README.md": "4b9ee8c9bbbf5f6362eaf08a387b6d6b7cc0adafca6b58d709d850c303968ecf",
+    "eslint.config.js": "5f2ee5303ab6d07512ff8a8efb43096d83a1bb50b93b37b0b40ac7fbe8c3ab24",
+    "package.json": "9c060ec9cb33072cc06489f34b04c7b45921c97dc545798c3d5db2794eba77d5",
+    "src/app.ts": "e86c03c90e305f7722c4dea4802a3083c9d613783a4dc2d9b3770b63c9513ba3",
+    "src/config.ts": "0675735344d08a1780023415bdf965322045cc431cfbadec1b4013e37d026c25",
+    "src/logger.ts": "78bc98a0c5b6b76fd1d3aa0716a6d149c70c9106ceab59f1ab2d1c554f6dcd6d",
+    "src/routes/health.ts": "0d54b35b6a78142223d2b4567042efd8e21664babb110f9790d9352f45517ca1",
+    "src/server.ts": "2b495a991d15ed2e3b0823948f5340a7e0f73b8bf3a41c16462c366160a8f514",
+    "test/health.test.ts": "7953280fbba028dfa223782c806c355ae31bd781c7e222352e8c822f7c28f7f6",
+    "tsconfig.build.json": "87b567b98788f2b0eafe7bbb926346c16eb173c0d7967ae3f52c2647e380e7ae",
+    "tsconfig.json": "b14885340ce35d42679ca00b0eac6b89940dda848fe7b86b83290cccdca85598"
+  },
+  "forgeVersion": "1.0.0",
+  "name": "book-api",
+  "schemaVersion": 1,
+  "template": {
+    "id": "express-api",
+    "version": "0.1.0"
+  }
+}

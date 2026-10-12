@@ -6,8 +6,10 @@ import { systemClock } from '../src/adapters/clock.js';
 import { createNodeFileSystem } from '../src/adapters/node-fs.js';
 import { run, type CliIo } from '../src/cli/main.js';
 import { EXIT } from '../src/errors/index.js';
-import { BUILTIN_FEATURES, BUILTIN_TEMPLATES, fakeRunner, PINS, ScriptedPrompter } from './helpers/fixtures.js';
+import { BUILTIN_FEATURES, BUILTIN_TEMPLATES, canSymlink, fakeRunner, PINS, ScriptedPrompter } from './helpers/fixtures.js';
 import type { ProcessRunner, Prompter } from '../src/ports/index.js';
+
+const symlinkOk = await canSymlink();
 
 let tmp: string;
 beforeEach(async () => {
@@ -126,7 +128,7 @@ describe('forge CLI', () => {
     expect(await fs.readFile(path.join(tmp, 'demo/.forge/backup', backups[0]!, 'README.md'), 'utf8')).toBe('mine\n');
   });
 
-  it('refuses to write through a real symlink, even with --force', async () => {
+  it.skipIf(!symlinkOk)('refuses to write through a real symlink, even with --force', async () => {
     await fs.mkdir(path.join(tmp, 'outside'));
     await fs.mkdir(path.join(tmp, 'demo'));
     await fs.symlink(path.join(tmp, 'outside'), path.join(tmp, 'demo/src'));

@@ -10,6 +10,8 @@ import type { NewProjectDeps } from '../../src/app/new-project.js';
 import type { Pins } from '../../src/core/pipeline/pins.js';
 import type { FileSystem } from '../../src/ports/index.js';
 import { FsError } from '../../src/errors/index.js';
+import fsp from 'node:fs/promises';
+import os from 'node:os';
 
 export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const BUILTIN_TEMPLATES = new DirectoryDefinitionSource(createNodeFileSystem(), path.join(REPO_ROOT, 'templates'), 'template');
@@ -125,4 +127,21 @@ export function fakeRunner(respond: (call: RecordedCall) => Partial<ProcessResul
       return { code: 0, stdout: '', stderr: '', ...respond(call) };
     },
   };
+}
+
+/** Normalize a native path to the POSIX form the in-memory filesystem uses. */
+export const posix = (p: string): string => p.replace(/\\/g, '/').replace(/^[A-Za-z]:(?=\/|$)/, '');
+
+/** Can this machine create symlinks? Windows needs Developer Mode or admin rights. */
+export async function canSymlink(): Promise<boolean> {
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'forge-symlink-probe-'));
+  try {
+    await fsp.writeFile(path.join(dir, 'target'), 'x');
+    await fsp.symlink(path.join(dir, 'target'), path.join(dir, 'link'));
+    return true;
+  } catch {
+    return false;
+  } finally {
+    await fsp.rm(dir, { recursive: true, force: true });
+  }
 }

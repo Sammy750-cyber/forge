@@ -81,6 +81,6 @@ describe('resolveInside', () => {
     expect(() => resolveInside('/r', 'a/..')).toThrow(FsError);
   });
   it('joins normal paths', () => {
-    expect(resolveInside('/r', 'a/b.txt')).toBe(path.join('/r', 'a', 'b.txt'));
+    expect(resolveInside('/r', 'a/b.txt')).toBe(path.resolve('/r', 'a', 'b.txt'));
   });
 });

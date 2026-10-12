@@ -4,11 +4,14 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createNodeFileSystem } from '../src/adapters/node-fs.js';
 import { FsError } from '../src/errors/index.js';
+import { canSymlink } from './helpers/fixtures.js';
 
 let tmp: string;
 beforeEach(async () => void (tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'forge-fs-'))));
 afterEach(async () => fs.rm(tmp, { recursive: true, force: true }));
 const enc = (s: string) => new TextEncoder().encode(s);
+
+const symlinkOk = await canSymlink()
 
 describe('node filesystem adapter', () => {
   const adapter = createNodeFileSystem();
@@ -31,7 +34,7 @@ describe('node filesystem adapter', () => {
     await expect(adapter.readdir(path.join(tmp, 'nope'))).rejects.toBeInstanceOf(FsError);
   });
 
-  it('does not follow symlinks in lstat, and exclusive writes refuse existing paths and links', async () => {
+  it.skipIf(!symlinkOk)('does not follow symlinks in lstat, and exclusive writes refuse existing paths and links', async () => {
     await fs.writeFile(path.join(tmp, 'target'), 'T');
     await fs.symlink(path.join(tmp, 'target'), path.join(tmp, 'link'));
     expect(await adapter.lstat(path.join(tmp, 'link'))).toMatchObject({ kind: 'symlink' });

@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1
+#
+# Multi-stage build: dev dependencies and the compiler never reach the runtime image.
+# Base images are pinned to a Node major and Debian release. For reproducible builds,
+# pin by digest (FROM node:22-bookworm-slim@sha256:...) and let Renovate or Dependabot update it.
+
+FROM node:22-bookworm-slim AS deps
+WORKDIR /app
+# package-lock.json is required: run "npm install" once and commit the lockfile.
+COPY package.json package-lock.json ./
+RUN npm ci
+
+FROM deps AS build
+COPY tsconfig.json tsconfig.build.json ./
+COPY src ./src
+RUN npm run build
+
+FROM node:22-bookworm-slim AS prod-deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+FROM node:22-bookworm-slim AS runtime
+ENV NODE_ENV=production
+ENV PORT=3000
+WORKDIR /app
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/dist ./dist
+COPY --chown=node:node package.json ./
+# The official image ships an unprivileged "node" user. Never run as root.
+USER node
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:3000/healthz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+CMD ["node", "dist/server.js"]

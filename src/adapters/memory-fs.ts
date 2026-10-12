@@ -14,13 +14,18 @@ function fail(errno: string, operation: string, target: string): FsError {
   return new FsError(`Could not ${operation} ${target} (${errno}).`, { errno });
 }
 
+/** Accept Windows-style paths ("C:\work\proj", "\work\proj") as the in-memory POSIX path "/work/proj". */
+function toMemoryPath(input: string): string {
+  return input.replace(/\\/g, '/').replace(/^[A-Za-z]:(?=\/|$)/, '');
+}
+
 /** An in-memory, POSIX-style filesystem used by tests. Mirrors the semantics the engine relies on. */
 export class MemoryFileSystem implements FileSystem {
   private readonly nodes = new Map<string, Node>([['/', { kind: 'dir', mode: 0o755 }]]);
 
   /** Resolve symlinks in every ancestor, and in the final component when `followLast` is set. */
   private canonical(input: string, followLast: boolean): string {
-    let current = posix.resolve('/', input);
+    let current = posix.resolve('/', toMemoryPath(input));
     for (let hop = 0; hop < MAX_SYMLINK_HOPS; hop += 1) {
       const parts = current.split('/').filter(Boolean);
       let acc = '';
@@ -137,13 +142,13 @@ export class MemoryFileSystem implements FileSystem {
   /** Create a symlink whose target is stored verbatim. */
   symlink(linkPath: string, target: string): void {
     const location = this.canonical(linkPath, false);
-    this.nodes.set(location, { kind: 'symlink', target });
+    this.nodes.set(location, { kind: 'symlink', target: toMemoryPath(target) });
   }
 
   /** Create files (and parent directories) from a path -> content map. */
   seed(files: Readonly<Record<string, string>>): void {
     for (const [file, content] of Object.entries(files)) {
-      const target = posix.resolve('/', file);
+      const target = posix.resolve('/', toMemoryPath(file));
       let acc = '';
       for (const part of posix.dirname(target).split('/').filter(Boolean)) {
         acc = `${acc}/${part}`;
