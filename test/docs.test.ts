@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { RULES } from '../src/core/doctor/rules.js';
 import { REPO_ROOT } from './helpers/fixtures.js';
 
-const read = (rel: string): string => readFileSync(path.join(REPO_ROOT, rel), 'utf8');
+// const read = (rel: string): string => readFileSync(path.join(REPO_ROOT, rel), 'utf8');
+const read = (rel: string): string => readFileSync(path.join(REPO_ROOT, rel), 'utf8').replace(/\r\n/g, '\n');
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
