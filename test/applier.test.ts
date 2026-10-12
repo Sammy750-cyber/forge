@@ -325,7 +325,7 @@ describe("atomicity: a failure at ANY step restores the exact previous tree", ()
       applyPlan(await planFor(hostile, V2, hashes(V1)), options(hostile)),
     ).rejects.toMatchObject({
       code: "FORGE_E_ROLLBACK_INCOMPLETE",
-      hint: expect.stringContaining(".forge/backup"),
+      hint: expect.stringMatching(/\.forge[\\/]+backup/),
     });
   });
 });

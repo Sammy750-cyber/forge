@@ -67,7 +67,7 @@ The test strategy (fault injection, convergence checks, running the tool on itse
 
 Be aware of these; none is hidden.
 
-1. **Windows is unverified.** The suite has not run there (the in-memory filesystem tests assume POSIX paths). The Windows CI job is allowed to fail. Do not rely on Windows support until it passes.
+1. **Windows is verified.** Now verified on windows, all tests now passes
 2. **TruffleHog `version` input.** Set to the pinned tag without the leading `v` (the action defaults to `latest`, which would unpin it). I could not verify the image tag format against the container registry from the build environment. Check the first pipeline run.
 3. **GitLab template names** (`Jobs/SAST.gitlab-ci.yml` and friends) follow GitLab's documentation but could not be fetched offline. Check the first pipeline run. GitLab security templates report but do not gate; container scanning is rejected rather than approximated.
 4. **Tools fetch data at run time.** Semgrep pulls its rule pack, Trivy its vulnerability database, and TruffleHog its image. The action and tool *versions* are pinned; the *content they fetch* is not. That is inherent to scanners (stale databases would defeat them).
