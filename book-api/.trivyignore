@@ -1,2 +1,0 @@
-# Accepted risks for Trivy. One finding ID per line, each with a comment saying why and until when.
-# CVE-0000-0000  # example: no fix upstream yet, review by 2027-01-01
