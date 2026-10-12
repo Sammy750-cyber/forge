@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryFileSystem } from '../src/adapters/memory-fs.js';
 import { nullLogger } from '../src/adapters/logger.js';
-import { createProcessRunner, minimalEnv } from '../src/adapters/process-runner.js';
+import { createProcessRunner, minimalEnv, resolveSpawn } from '../src/adapters/process-runner.js';
 import { collectAnswers } from '../src/app/collect-answers.js';
 import { runPostSteps } from '../src/app/post-steps.js';
 import { resolveAnswers } from '../src/core/definition/answers.js';
@@ -134,4 +134,16 @@ describe('process runner', () => {
     setTimeout(() => controller.abort(), 100);
     expect((await pending).code).toBeNull();
   });
+
+  it('runs Windows package-manager shims through cmd.exe with a fixed argument list, and refuses metacharacters', () => {
+  expect(resolveSpawn('npm', ['install', '--no-audit'], 'win32')).toEqual({
+    file: 'cmd.exe',
+    args: ['/d', '/s', '/c', 'npm', 'install', '--no-audit'],
+  });
+  expect(resolveSpawn('git', ['init'], 'win32')).toEqual({ file: 'git', args: ['init'] });
+  expect(resolveSpawn('npm', ['install'], 'linux')).toEqual({ file: 'npm', args: ['install'] });
+  for (const bad of ['a & calc', 'a|b', 'a>b', '%PATH%', 'a"b', 'a^b', 'a\nb']) {
+    expect(() => resolveSpawn('npm', [bad], 'win32')).toThrow(/unsafe argument/);
+  }
+});
 });
