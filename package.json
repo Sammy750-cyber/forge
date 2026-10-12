@@ -1,5 +1,5 @@
 {
-  "name": "forge-cli",
+  "name": "forgekit",
   "version": "1.0.0",
   "description": "Generate and maintain secure-by-default projects: templates, CI pipelines with pinned security scanning, and a doctor that keeps them honest.",
   "keywords": [
