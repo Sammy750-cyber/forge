@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (2026-10-10)
+## 1.0.0 (2026-10-12)
 
 First stable release.
 
@@ -18,7 +18,6 @@ First stable release.
 - Plan/apply with hash-based ownership: idempotent, deterministic, contained, atomic (failure injected at every step in tests), non-destructive.
 
 ### Known limitations
-- Windows is unverified (the Windows CI job is allowed to fail until it is).
 - GitLab container scanning is not supported; GitLab security templates report but do not gate.
 - `express-api` Docker base image is pinned by tag, not digest.
 
