@@ -21,17 +21,35 @@ const wanted = process.argv.slice(2);
 const templates = wanted.length > 0 ? wanted : listed;
 
 let failures = 0;
+// const step = (label, cwd, command, args, timeout = 240_000) => {
+//   const started = Date.now();
+//   const result = spawnSync(command, args, { cwd, encoding: 'utf8', timeout, env: process.env });
+//   const seconds = ((Date.now() - started) / 1000).toFixed(1);
+//   if (result.status === 0) {
+//     console.log(`  ok    ${label} (${seconds}s)`);
+//     return true;
+//   }
+//   failures += 1;
+//   // console.log(`  FAIL  ${label} (${seconds}s)\n${(result.stdout + result.stderr).split('\n').slice(-25).join('\n')}`);
+//   console.log(`  FAIL  ${label} (${seconds}s)\n${(String(result.stdout ?? '') + String(result.stderr ?? '')).split('\n').slice(-25).join('\n')}`);
+//   return false;
+// };
+
 const step = (label, cwd, command, args, timeout = 240_000) => {
   const started = Date.now();
-  const result = spawnSync(command, args, { cwd, encoding: 'utf8', timeout, env: process.env });
+  // Windows cannot start npm.cmd directly. Go through cmd.exe with a fixed argument list (no `shell` option).
+  const [file, fileArgs] =
+    process.platform === 'win32' && command === 'npm' ? ['cmd.exe', ['/d', '/s', '/c', 'npm', ...args]] : [command, args];
+  const result = spawnSync(file, fileArgs, { cwd, encoding: 'utf8', timeout, env: process.env });
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
   if (result.status === 0) {
     console.log(`  ok    ${label} (${seconds}s)`);
     return true;
   }
   failures += 1;
-  // console.log(`  FAIL  ${label} (${seconds}s)\n${(result.stdout + result.stderr).split('\n').slice(-25).join('\n')}`);
-  console.log(`  FAIL  ${label} (${seconds}s)\n${(String(result.stdout ?? '') + String(result.stderr ?? '')).split('\n').slice(-25).join('\n')}`);
+  // Include the spawn error too, so "could not start" is never reported as a blank failure.
+  const output = `${result.stdout ?? ''}${result.stderr ?? ''}${result.error ? `\n${result.error.message}` : ''}`;
+  console.log(`  FAIL  ${label} (${seconds}s)\n${output.split('\n').slice(-25).join('\n')}`);
   return false;
 };
 

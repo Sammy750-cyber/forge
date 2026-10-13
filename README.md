@@ -19,7 +19,7 @@ The generated pipelines pin every GitHub Action to a full commit SHA, default to
 ## Install
 
 ```sh
-npm install --global forgekit      # or: npx forgekit ...
+npm install --global forge-secure      # or: npx forge-secure ...
 forge --help
 ```
 
