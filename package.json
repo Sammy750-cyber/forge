@@ -1,6 +1,6 @@
 {
   "name": "forge-secure",
-  "repository": {"type": "git", "url": "https://github.com/Sammy750-cyber/forge.git"},
+  "repository": {"type": "git", "url": "https://github.com/Sammy750-cyber/forge"},
   "homepage": "https://github.com/Sammy750-cyber/forge#readme",
   "bugs":{
     "url": "https://github.com/Sammy750-cyber/forge/issues"
