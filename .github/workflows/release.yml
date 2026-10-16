@@ -45,5 +45,4 @@ jobs:
         run: pnpm build
       - name: Publish with provenance
         run: pnpm publish --provenance --access public --no-git-checks
-        env:
         
