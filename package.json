@@ -5,7 +5,7 @@
   "bugs":{
     "url": "https://github.com/Sammy750-cyber/forge/issues"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Generate and maintain secure-by-default projects: templates, CI pipelines with pinned security scanning, and a doctor that keeps them honest.",
   "keywords": [
     "scaffold",

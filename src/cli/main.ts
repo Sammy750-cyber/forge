@@ -5,6 +5,7 @@ import { addFeatures } from '../app/add-features.js';
 import { collectAnswers } from '../app/collect-answers.js';
 import { detectProject } from '../app/detect.js';
 import { runDoctor } from '../app/doctor.js';
+import { isWorkingTreeDirty, prepareUpdate, runUpdate } from '../app/update-project.js';
 import { loadComposition, type GenerateResult } from '../app/generate.js';
 import { newProject } from '../app/new-project.js';
 import { runPostSteps, type PostStep, type PostStepResult } from '../app/post-steps.js';
@@ -20,6 +21,7 @@ import type { Clock, FileSystem, Logger, ProcessRunner, Prompter } from '../port
 import { RULES } from '../core/doctor/rules.js';
 import { toSarif } from '../core/doctor/sarif.js';
 import { formatDoctorJson, formatDoctorText, formatRuleList } from './doctor-output.js';
+import { formatUpdate, formatUpdateJson, summarizeUpdate } from './update-output.js';
 import { formatError, formatPlan, formatPlanJson, formatSummary } from './render-output.js';
 
 export interface CliIo {
@@ -279,6 +281,56 @@ export async function run(argv: readonly string[], io: CliIo, deps: CliDeps): Pr
       const ids = await source.list();
       if (options().format === 'json') io.stdout(stableStringify({ [local.features === true ? 'features' : 'templates']: ids }));
       else io.stdout(ids.length === 0 ? 'Nothing installed.\n' : `${ids.join('\n')}\n`);
+    });
+
+  program
+    .command('update')
+    .description('bring this project up to date with the templates and features it was generated from (not the Forge CLI itself)')
+    .option('--check', 'change nothing; exit 8 if the project is behind (for CI)')
+    .option('--diff', 'show what would change, line by line (use with --dry-run or --check)')
+    .option('--partial', 'apply what is safe and leave conflicting files exactly as they are')
+    .option('--prune', 'delete files the template no longer generates, if you never edited them')
+    .option('--answer <key=value>', 'answer or change a question (repeatable)', collectAnswer, {})
+    .action(async (local: { check?: boolean; diff?: boolean; partial?: boolean; prune?: boolean; answer: Record<string, string> }) => {
+      const opts = options();
+      const config = await buildConfig(opts, io, deps, logger);
+      logger = newLogger(config, opts.format === 'json');
+      const root = path.resolve(io.cwd, opts.cwd ?? '.');
+      const updateDeps = { fs: deps.fs, templates: deps.templates, features: deps.features, pins: deps.pins, clock: deps.clock, logger, forgeVersion: deps.forgeVersion };
+      const prepared = await prepareUpdate(updateDeps, root);
+
+      const interactive = deps.prompter !== undefined && !config.values.noInput && opts.yes !== true;
+      const answers: RawAnswers =
+        interactive && deps.prompter !== undefined
+          ? await collectAnswers(prepared.composition.questions, { ...prepared.storedAnswers, ...local.answer }, deps.prompter)
+          : local.answer;
+      const dryRun = opts.dryRun === true || local.check === true;
+      if (!dryRun && (await isWorkingTreeDirty(deps.runner, deps.fs, root)) === true) {
+        logger.warn('You have uncommitted changes. Forge keeps backups, but committing first makes this update easy to review and undo.');
+      }
+
+      const result = await runUpdate(updateDeps, prepared, {
+        answers,
+        useDefaults: opts.yes === true,
+        dryRun,
+        diff: local.diff === true,
+        partial: local.partial === true,
+        force: opts.force === true,
+        prune: local.prune === true,
+        ...(deps.signal === undefined ? {} : { signal: deps.signal }),
+      });
+
+      if (opts.format === 'json') io.stdout(formatUpdateJson(result));
+      else {
+        io.stdout(formatUpdate(result, { color: config.values.color && io.isTTY, verbose: opts.verbose === true }));
+        logger.info(summarizeUpdate(result));
+        if (result.droppedAnswers.length > 0) logger.info(`Dropped answers that are no longer asked or no longer valid: ${result.droppedAnswers.join(', ')}.`);
+        const realBackups = (result.applied?.backedUp ?? []).filter((p) => p !== '.forge/state.json');
+        if (result.applied?.backupDir && realBackups.length > 0) logger.info(`Previous versions of changed files are in ${path.relative(root, result.applied.backupDir) || result.applied.backupDir}`);
+      }
+      if (local.check === true) {
+        if (!result.upToDate) finalCode = EXIT.OUTDATED;
+      } else if (result.conflictsRemaining > 0 && !dryRun) finalCode = EXIT.CONFLICT;
     });
 
   program

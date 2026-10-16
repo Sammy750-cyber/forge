@@ -15,10 +15,17 @@ export interface ApplyOptions {
   readonly signal?: AbortSignal;
   /** How many backup folders to keep under .forge/backup. Default 5. */
   readonly backupRetention?: number;
+  /**
+   * Project-relative regular files to delete. Each is backed up first and restored on rollback.
+   * Paths that are already gone are skipped; symlinks and directories are refused.
+   */
+  readonly deletes?: readonly string[];
 }
 
 export interface ApplyResult {
   readonly written: readonly string[];
+  /** Files removed (each is in the backup folder). */
+  readonly deleted: readonly string[];
   readonly backedUp: readonly string[];
   /** Absolute path of the backup folder, or null if nothing needed backing up. */
   readonly backupDir: string | null;
@@ -54,7 +61,8 @@ export async function applyPlan(plan: Plan, options: ApplyOptions): Promise<Appl
     throw new ConflictError(`Cannot apply a plan with ${unresolved.length} unresolved conflict(s).`, { code: 'FORGE_E_CONFLICT' });
   }
   const writes = plan.ops.filter((op): op is PlanOp & { file: NonNullable<PlanOp['file']> } => isWritable(op, options.overwriteConflicts));
-  if (writes.length === 0) return { written: [], backedUp: [], backupDir: null };
+  const requestedDeletes = options.deletes ?? [];
+  if (writes.length === 0 && requestedDeletes.length === 0) return { written: [], deleted: [], backedUp: [], backupDir: null };
 
   const abortIfRequested = (): void => {
     if (signal?.aborted) throw new InterruptedError();
@@ -91,6 +99,20 @@ export async function applyPlan(plan: Plan, options: ApplyOptions): Promise<Appl
       }
     }
 
+    // Deletes get the same scrutiny as writes: only regular files, never through a link.
+    const toDelete: string[] = [];
+    for (const relative of requestedDeletes) {
+      const entry = await inspectPath(fs, root, relative);
+      if (entry.kind === 'missing') continue;
+      if (entry.kind !== 'file') {
+        throw new FsError(`Cannot delete ${relative}: ${entry.kind === 'dir' ? 'it is a directory' : entry.reason}.`, {
+          code: 'FORGE_E_BLOCKED_PATH',
+          hint: 'Forge only deletes regular files. Remove it yourself if you really want it gone.',
+        });
+      }
+      toDelete.push(relative);
+    }
+
     const ensureDir = async (directory: string): Promise<void> => {
       const relative = path.relative(root, directory);
       if (relative === '') return;
@@ -108,7 +130,10 @@ export async function applyPlan(plan: Plan, options: ApplyOptions): Promise<Appl
     };
 
     // Backups first, so that rollback and recovery always have the original bytes.
-    const needBackup = writes.filter((op) => op.kind === 'update' || op.kind === 'merge' || op.kind === 'conflict');
+    const needBackup = [
+      ...writes.filter((op) => op.kind === 'update' || op.kind === 'merge' || op.kind === 'conflict').map((op) => op.path),
+      ...toDelete,
+    ];
     if (needBackup.length > 0) {
       const backupBase = path.join(root, ...BACKUP_ROOT);
       const baseName = stamp(options.clock.now());
@@ -116,13 +141,13 @@ export async function applyPlan(plan: Plan, options: ApplyOptions): Promise<Appl
       for (let suffix = 2; (await fs.lstat(candidate)) !== null; suffix += 1) candidate = path.join(backupBase, `${baseName}-${suffix}`);
       await ensureDir(backupBase);
       backupDir = candidate;
-      for (const op of needBackup) {
+      for (const relative of needBackup) {
         abortIfRequested();
-        const source = resolveInside(root, op.path);
-        const copy = resolveInside(backupDir, op.path);
+        const source = resolveInside(root, relative);
+        const copy = resolveInside(backupDir, relative);
         await fs.mkdir(path.dirname(copy));
         await fs.writeFile(copy, await fs.readFile(source));
-        backedUp.push(op.path);
+        backedUp.push(relative);
       }
     }
 
@@ -144,8 +169,18 @@ export async function applyPlan(plan: Plan, options: ApplyOptions): Promise<Appl
       logger.debug('wrote file', { path: op.path });
     }
 
+    for (const relative of toDelete) {
+      abortIfRequested();
+      const target = resolveInside(root, relative);
+      const stat = await fs.lstat(target);
+      const original = await fs.readFile(target);
+      await fs.remove(target);
+      journal.push({ target, original, originalMode: stat?.mode ?? 0o644 });
+      logger.debug('deleted file', { path: relative });
+    }
+
     await prune(fs, root, backupDir, options.backupRetention ?? DEFAULT_RETENTION);
-    return { written: writes.map((op) => op.path), backedUp, backupDir };
+    return { written: writes.map((op) => op.path), deleted: toDelete, backedUp, backupDir };
   } catch (error) {
     const problems: unknown[] = [];
     const attempt = async (step: () => Promise<void>): Promise<void> => {
