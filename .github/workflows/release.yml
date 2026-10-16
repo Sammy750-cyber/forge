@@ -45,4 +45,6 @@ jobs:
         run: pnpm build
       - name: Publish with provenance
         run: pnpm publish --provenance --access public --no-git-checks
+        env:
+          NPM_TOKEN: ${{env.NPM_TOKEN}}
         
