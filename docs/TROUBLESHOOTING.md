@@ -14,6 +14,7 @@ Every error Forge prints ends with a `code:` line. Find it here. Add `--verbose`
 | 5 | A template or feature definition is invalid or failed to render |
 | 6 | `doctor` found problems at or above `--fail-on` |
 | 7 | Filesystem or permission error |
+| 8 | `forge update --check`: the project is behind what this Forge would generate |
 | 130 | Interrupted (Ctrl-C) or cancelled. Nothing was left half-written. |
 
 ## Usage
@@ -40,11 +41,15 @@ Every error Forge prints ends with a `code:` line. Find it here. Add `--verbose`
 
 **`FORGE_E_STATE_INVALID`**: the state file is not valid JSON, has the wrong shape, or lists an unsafe path. Restore it from version control, or delete `.forge/` (Forge will then treat existing files as unmanaged and ask before overwriting them).
 
+**`FORGE_E_NOT_A_PROJECT`**: `forge update` needs `.forge/state.json` to know what the project was generated from, and there is none. To bring an existing repository under Forge, run `forge add <feature>`; after that, `forge update` works.
+
+**`FORGE_E_DOWNGRADE`**: the project records a newer version of a template or feature than this Forge provides, so updating would silently regress its files. Upgrade Forge. Nothing was changed. See [UPDATE.md](UPDATE.md).
+
 **`FORGE_E_STATE_NEWER`**: the project was last touched by a newer Forge. Upgrade Forge. It refuses to guess rather than corrupt your state.
 
 ## Conflicts
 
-**`FORGE_E_CONFLICT`**: a file Forge wants to write already exists with content Forge did not generate, or you edited a generated file. Nothing was changed. Review the listed files, then re-run with `--force` to overwrite them; the previous contents are saved under `.forge/backup/<timestamp>/`. For files Forge can merge (`.gitignore`, `package.json`, YAML), conflicts only arise when the existing file cannot be parsed.
+**`FORGE_E_CONFLICT`**: a file Forge wants to write already exists with content Forge did not generate, or you edited a generated file. Nothing was changed. Review the listed files, then re-run with `--force` to overwrite them (for `forge update`, `--dry-run --diff` shows the differences and `--partial` applies everything else); the previous contents are saved under `.forge/backup/<timestamp>/`. For files Forge can merge (`.gitignore`, `package.json`, YAML), conflicts only arise when the existing file cannot be parsed.
 
 **`FORGE_E_NOT_EMPTY`**: `forge new` was pointed at a directory that has files in it (or at a file). Choose an empty directory, or use `--force` to write alongside existing files.
 

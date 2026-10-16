@@ -79,12 +79,12 @@ describe('documentation stays true to the code', () => {
 
   it('package metadata is release-ready', () => {
     const pkg = JSON.parse(read('package.json')) as Record<string, unknown>;
-    expect(pkg['version']).toBe('1.0.0');
+    expect(pkg['version']).toBe('1.1.0');
     expect(pkg['private']).toBeUndefined();
     expect(pkg['license']).toBe('MIT');
     expect(pkg['publishConfig']).toMatchObject({ provenance: true, access: 'public' });
     expect(pkg['packageManager']).toMatch(/^pnpm@\d+\.\d+\.\d+$/);
-    expect(read('CHANGELOG.md')).toMatch(/^## 1\.0\.0 /m);
+    expect(read('CHANGELOG.md')).toMatch(/^## 1\.1\.0 /m);
     expect(read('LICENSE')).toContain('MIT License');
   });
 });

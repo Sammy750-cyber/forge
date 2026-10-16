@@ -12,6 +12,8 @@ export const EXIT = {
   DEFINITION: 5,
   DOCTOR: 6,
   FS: 7,
+  /** `forge update --check` found that the project is behind what this Forge would generate. */
+  OUTDATED: 8,
   INTERRUPTED: 130,
 } as const;
 
