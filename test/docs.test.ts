@@ -79,7 +79,8 @@ describe('documentation stays true to the code', () => {
 
   it('package metadata is release-ready', () => {
     const pkg = JSON.parse(read('package.json')) as Record<string, unknown>;
-    expect(pkg['version']).toBe('1.1.0');
+    const top = /^## (\d+\.\d+\.\d+) /m.exec(read('CHANGELOG.md'))?.[1];
+    expect(pkg['version']).toBe(top);
     expect(pkg['private']).toBeUndefined();
     expect(pkg['license']).toBe('MIT');
     expect(pkg['publishConfig']).toMatchObject({ provenance: true, access: 'public' });
