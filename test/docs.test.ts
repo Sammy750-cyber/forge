@@ -85,7 +85,7 @@ describe('documentation stays true to the code', () => {
     expect(pkg['license']).toBe('MIT');
     expect(pkg['publishConfig']).toMatchObject({ provenance: true, access: 'public' });
     expect(pkg['packageManager']).toMatch(/^pnpm@\d+\.\d+\.\d+$/);
-    expect(read('CHANGELOG.md')).toMatch(/^## 1\.1\.0 /m);
+    expect(read('CHANGELOG.md')).toMatch(/^## 1\.1\.1 /m);
     expect(read('LICENSE')).toContain('MIT License');
   });
 });
