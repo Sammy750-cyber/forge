@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.1.0 (2026-10-12)
+## 1.1.1 (2026-11-03)
 
-First stable release.
+Fixed some `High` and `Moderate` dependency vulnerabilities.
 
 ### Added
 - `forge new`: create projects from templates, with `--feature` overlays, interactive prompts, and opt-in `--git` / `--install` steps.
